@@ -26,7 +26,7 @@ def health():
     }), 200
 
 
-@app.route("/status")
+@app.route("/running")
 def status():
     return jsonify({
         "application": "CloudDeploy",
