@@ -1,20 +1,32 @@
-# 1. Use a lightweight official Python image
-FROM python:3.11-slim
+version: '3.8'
 
-# 2. Set the working directory inside the container
-WORKDIR /app
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - ENVIRONMENT=production
+    restart: always
 
-# 3. Copy only the requirements first (caches dependencies)
-COPY requirements.txt .
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
 
-# 4. Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+  node_exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+    restart: always
 
-# 5. Copy the rest of your application code
-COPY app/ app/
-
-# 6. Expose the port your Flask app runs on
-EXPOSE 5000
-
-# 7. Tell Docker how to run your application
-CMD ["python", "app/app.py"]
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: always
